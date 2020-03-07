@@ -1,6 +1,6 @@
 # Specify the provider and access details
 provider "aws" {
-  region = "${var.aws_region}"
+  region = var.aws_region
 }
 
 # Create a VPC to launch our instances into
@@ -10,19 +10,19 @@ resource "aws_vpc" "default" {
 
 # Create an internet gateway to give our subnet access to the outside world
 resource "aws_internet_gateway" "default" {
-  vpc_id = "${aws_vpc.default.id}"
+  vpc_id = "aws_vpc.default.id
 }
 
 # Grant the VPC internet access on its main route table
 resource "aws_route" "internet_access" {
-  route_table_id         = "${aws_vpc.default.main_route_table_id}"
+  route_table_id         = aws_vpc.default.main_route_table_id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = "${aws_internet_gateway.default.id}"
+  gateway_id             = aws_internet_gateway.default.id
 }
 
 # Create a subnet to launch our instances into
 resource "aws_subnet" "default" {
-  vpc_id                  = "${aws_vpc.default.id}"
+  vpc_id                  = aws_vpc.default.id
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
 }
@@ -31,7 +31,7 @@ resource "aws_subnet" "default" {
 resource "aws_security_group" "elb" {
   name        = "terraform_example_elb"
   description = "Used in the terraform"
-  vpc_id      = "${aws_vpc.default.id}"
+  vpc_id      = aws_vpc.default.id
 
   # HTTP access from anywhere
   ingress {
@@ -55,7 +55,7 @@ resource "aws_security_group" "elb" {
 resource "aws_security_group" "default" {
   name        = "terraform_example"
   description = "Used in the terraform"
-  vpc_id      = "${aws_vpc.default.id}"
+  vpc_id      = aws_vpc.default.id
 
   # SSH access from anywhere
   ingress {
@@ -98,7 +98,7 @@ resource "aws_elb" "web" {
 }
 
 resource "aws_key_pair" "auth" {
-  key_name   = "${var.key_name}"
+  key_name   = var.key_name
   public_key = "${file(var.public_key_path)}"
 }
 
@@ -119,7 +119,7 @@ resource "aws_instance" "web" {
   ami = "${lookup(var.aws_amis, var.aws_region)}"
 
   # The name of our SSH keypair we created above.
-  key_name = "${aws_key_pair.auth.id}"
+  key_name = aws_key_pair.auth.id
 
   # Our Security group to allow HTTP and SSH access
   vpc_security_group_ids = ["${aws_security_group.default.id}"]
@@ -127,7 +127,7 @@ resource "aws_instance" "web" {
   # We're going to launch into the same subnet as our ELB. In a production
   # environment it's more common to have a separate private subnet for
   # backend instances.
-  subnet_id = "${aws_subnet.default.id}"
+  subnet_id = aws_subnet.default.id
 
   # We run a remote provisioner on the instance after creating it.
   # In this case, we just install nginx and start it. By default,
